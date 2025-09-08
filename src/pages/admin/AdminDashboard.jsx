@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api, { formatIDR } from '../../utils/api';
 
 const AdminDashboard = () => {
@@ -15,14 +15,19 @@ const AdminDashboard = () => {
       try {
         const [productsRes, ordersRes, categoriesRes] = await Promise.all([
           api.products.getAll(),
-          api.orders.getAll(),
+          api.orders.getAll({ page: 1, limit: 1000 }),
           api.categories.getAll()
         ]);
 
-        const orders = ordersRes.data;
+        const ordersPayload = ordersRes.data;
+        const orders = Array.isArray(ordersPayload) ? ordersPayload : (ordersPayload?.data || []);
+        const totalOrders = Array.isArray(ordersPayload)
+          ? ordersPayload.length
+          : (ordersPayload?.pagination?.totalItems ?? orders.length);
+
         setStats({
           totalProducts: productsRes.data.length,
-          totalOrders: orders.length,
+          totalOrders,
           totalCategories: categoriesRes.data.length,
           pendingOrders: orders.filter(order => order.status === 'pending').length
         });
