@@ -11,7 +11,7 @@ const PublicNavbar = () => {
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-white/20 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center p-5">
+        <div className="flex justify-between items-center py-3">
           <Link to="/" className="text-2xl font-bold text-primary-600">
             <div className="w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden">
               <img src={Logo} className="w-full h-full object-containe" />
