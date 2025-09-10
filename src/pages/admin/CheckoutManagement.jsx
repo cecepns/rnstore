@@ -87,9 +87,9 @@ const CheckoutManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {orders.map((order, index) => (
                 <tr key={order.id} className="border-b border-gray-100">
-                  <td className="py-3 px-4 text-gray-600">#{order.id}</td>
+                  <td className="py-3 px-4 text-gray-600">#{index + 1}</td>
                   <td className="py-3 px-4 text-gray-900">{order.customer_name}</td>
                   <td className="py-3 px-4 text-gray-600">{order.product_name}</td>
                   <td className="py-3 px-4 text-gray-900 font-semibold">

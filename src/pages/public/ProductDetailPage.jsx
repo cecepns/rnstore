@@ -6,7 +6,8 @@ import CheckoutForm from "../../components/public/CheckoutForm";
 const ProductDetailPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedColorName, setSelectedColorName] = useState("");
+  const [selectedColorHex, setSelectedColorHex] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -25,7 +26,8 @@ const ProductDetailPage = () => {
 
         // Set default selected color and image
         if (productData.colors && productData.colors.length > 0) {
-          setSelectedColor(productData.colors[0].color);
+          setSelectedColorName(productData.colors[0].name || productData.colors[0].color || "");
+          setSelectedColorHex(productData.colors[0].color || "");
           setSelectedImage(productData.colors[0].image);
         }
       } catch (error) {
@@ -52,8 +54,9 @@ const ProductDetailPage = () => {
     fetchSettings();
   }, [id]);
 
-  const handleColorSelect = (color, image) => {
-    setSelectedColor(color);
+  const handleColorSelect = (name, color, image) => {
+    setSelectedColorName(name || color);
+    setSelectedColorHex(color);
     setSelectedImage(image);
   };
 
@@ -94,7 +97,7 @@ const ProductDetailPage = () => {
   const handleOrderViaWhatsApp = () => {
     const message = `Halo, saya ingin memesan:\n\n${
       product.name
-    }\nWarna: ${selectedColor}\nJumlah: ${quantity}\nHarga: Rp ${formatIDR(
+    }\nWarna: ${selectedColorName}\nJumlah: ${quantity}\nHarga: Rp ${formatIDR(
       product.price * quantity
     )}\n\nTerima kasih!`;
 
@@ -155,10 +158,10 @@ const ProductDetailPage = () => {
                     <button
                       key={index}
                       onClick={() =>
-                        handleColorSelect(colorOption.color, colorOption.image)
+                        handleColorSelect(colorOption.name, colorOption.color, colorOption.image)
                       }
-                      style={{backgroundColor: colorOption.color}}
-                      className={`px-4 w-14 h-14 rounded-full py-2 rounded-lg border-2 transition-all bg-[${colorOption.color}]`}
+                      style={{ backgroundColor: colorOption.color }}
+                      className={`w-14 h-14 rounded-full border-2 transition-all`}
                     >
                     </button>
                   ))}
@@ -291,7 +294,8 @@ const ProductDetailPage = () => {
       {showCheckoutForm && (
         <CheckoutForm
           product={product}
-          selectedColor={selectedColor}
+          selectedColorName={selectedColorName}
+          selectedColorHex={selectedColorHex}
           quantity={quantity}
           onOrderSuccess={handleOrderSuccess}
           onCancel={handleCancelCheckout}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api, { formatIDR } from '../../utils/api';
 
 /* eslint-disable react/prop-types */
-const CheckoutForm = ({ product, selectedColor, quantity, onOrderSuccess, onCancel }) => {
+const CheckoutForm = ({ product, selectedColorName, selectedColorHex, quantity, onOrderSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_phone: '',
@@ -49,7 +49,7 @@ const CheckoutForm = ({ product, selectedColor, quantity, onOrderSuccess, onCanc
       formDataToSend.append('customer_address', formData.customer_address);
       formDataToSend.append('product_id', product.id);
       formDataToSend.append('product_name', product.name);
-      formDataToSend.append('product_color', selectedColor);
+      formDataToSend.append('product_color', selectedColorName || selectedColorHex);
       formDataToSend.append('quantity', quantity);
       formDataToSend.append('total_price', product.price * quantity);
 
@@ -65,7 +65,7 @@ const CheckoutForm = ({ product, selectedColor, quantity, onOrderSuccess, onCanc
             customer_address: formData.customer_address,
             product_id: product.id,
             product_name: product.name,
-            product_color: selectedColor,
+            product_color: selectedColorName || selectedColorHex,
             quantity: quantity,
             total_price: product.price * quantity
           },
@@ -94,9 +94,10 @@ const CheckoutForm = ({ product, selectedColor, quantity, onOrderSuccess, onCanc
             <p><strong>Produk:</strong> {product.name}</p>
             <p className="flex items-center gap-2">
               <strong>Warna:</strong>
+              <span>{selectedColorName || '-'}</span>
               <span
                 className="inline-block w-5 h-5 rounded border border-gray-300"
-                style={{ backgroundColor: selectedColor }}
+                style={{ backgroundColor: selectedColorHex }}
                 aria-label="Selected color"
               />
             </p>

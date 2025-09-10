@@ -17,7 +17,7 @@ const ProductManagement = () => {
     specifications: '',
     price: '',
     category_id: '',
-    colors: [{ color: '#000000', image: null }]
+    colors: [{ name: '', color: '#000000', image: null }]
   });
   const [showColorPicker, setShowColorPicker] = useState({});
 
@@ -63,27 +63,41 @@ const ProductManagement = () => {
   };
 
   const addColorVariant = () => {
-    setFormData({
-      ...formData,
-      colors: [...formData.colors, { color: '#000000', image: null }]
-    });
+    setFormData((prev) => ({
+      ...prev,
+      colors: [...prev.colors, { name: '', color: '#000000', image: null }]
+    }));
   };
 
   const removeColorVariant = (index) => {
-    const newColors = formData.colors.filter((_, i) => i !== index);
-    setFormData({ ...formData, colors: newColors });
+    setFormData((prev) => ({
+      ...prev,
+      colors: prev.colors.filter((_, i) => i !== index)
+    }));
   };
 
   const updateColorValue = (index, color) => {
-    const newColors = [...formData.colors];
-    newColors[index].color = color;
-    setFormData({ ...formData, colors: newColors });
+    setFormData((prev) => {
+      const newColors = [...prev.colors];
+      newColors[index] = { ...newColors[index], color };
+      return { ...prev, colors: newColors };
+    });
+  };
+
+  const updateColorName = (index, name) => {
+    setFormData((prev) => {
+      const newColors = [...prev.colors];
+      newColors[index] = { ...newColors[index], name };
+      return { ...prev, colors: newColors };
+    });
   };
 
   const updateColorImage = (index, file) => {
-    const newColors = [...formData.colors];
-    newColors[index].image = file;
-    setFormData({ ...formData, colors: newColors });
+    setFormData((prev) => {
+      const newColors = [...prev.colors];
+      newColors[index] = { ...newColors[index], image: file };
+      return { ...prev, colors: newColors };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -96,8 +110,8 @@ const ProductManagement = () => {
     formDataToSend.append('price', formData.price);
     formDataToSend.append('category_id', formData.category_id);
     
-    // Add color data
-    formDataToSend.append('colors', JSON.stringify(formData.colors.map(c => ({ color: c.color }))));
+    // Add color data (include name and hex)
+    formDataToSend.append('colors', JSON.stringify(formData.colors.map(c => ({ name: c.name || '', color: c.color }))));
     
     // Add images
     formData.colors.forEach((colorVariant, index) => {
@@ -128,7 +142,11 @@ const ProductManagement = () => {
       specifications: product.specifications || '',
       price: product.price,
       category_id: product.category_id,
-      colors: product.colors || [{ color: '#000000', image: null }]
+      colors: (product.colors || [{ color: '#000000', image: null }]).map((c) => ({
+        name: c.name || '',
+        color: c.color,
+        image: c.image || null
+      }))
     });
     setShowForm(true);
   };
@@ -151,7 +169,7 @@ const ProductManagement = () => {
       specifications: '',
       price: '',
       category_id: '',
-      colors: [{ color: '#000000', image: null }]
+      colors: [{ name: '', color: '#000000', image: null }]
     });
     setEditingProduct(null);
     setShowForm(false);
@@ -198,7 +216,7 @@ const ProductManagement = () => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                     required
                     className="input-field"
                   />
@@ -210,7 +228,7 @@ const ProductManagement = () => {
                   </label>
                   <select
                     value={formData.category_id}
-                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, category_id: e.target.value }))}
                     required
                     className="input-field"
                   >
@@ -231,7 +249,7 @@ const ProductManagement = () => {
                 <input
                   type="number"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
                   required
                   className="input-field"
                 />
@@ -244,7 +262,7 @@ const ProductManagement = () => {
                 <div className="rounded-lg">
                   <ReactQuill
                     value={formData.description}
-                    onChange={(value) => setFormData({ ...formData, description: value })}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, description: value }))}
                     modules={quillModules}
                     formats={quillFormats}
                   />
@@ -257,7 +275,7 @@ const ProductManagement = () => {
                 </label>
                 <textarea
                   value={formData.specifications}
-                  onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, specifications: e.target.value }))}
                   placeholder="Masukkan spesifikasi produk (contoh: Layar 6.1 inch, RAM 4GB, Storage 128GB, Kamera 12MP, dll.)"
                   required
                   rows={3}
@@ -299,15 +317,27 @@ const ProductManagement = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nama Warna
+                          </label>
+                          <input
+                            type="text"
+                            value={colorVariant.name}
+                            onChange={(e) => updateColorName(index, e.target.value)}
+                            placeholder="Misal: Biru, Midnight, Starlight"
+                            className="input-field"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
                             Pilih Warna
                           </label>
                           <div className="relative">
                             <button
                               type="button"
-                              onClick={() => setShowColorPicker({
-                                ...showColorPicker,
-                                [index]: !showColorPicker[index]
-                              })}
+                              onClick={() => setShowColorPicker((prev) => ({
+                                ...prev,
+                                [index]: !prev[index]
+                              }))}
                               className="w-full h-10 rounded border border-gray-300 flex items-center px-3"
                               style={{ backgroundColor: colorVariant.color }}
                             >

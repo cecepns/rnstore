@@ -347,10 +347,11 @@ app.post('/api/products', authenticateToken, upload.any(), (req, res) => {
     const colorData = JSON.parse(colors);
     const files = req.files || [];
     
-    // Map uploaded files to colors
+    // Map uploaded files to colors, include name
     const colorsWithImages = colorData.map((color, index) => {
       const imageFile = files.find(f => f.fieldname === `color_image_${index}`);
       return {
+        name: color.name || '',
         color: color.color,
         image: imageFile ? `/uploads/${imageFile.filename}` : null
       };
@@ -390,10 +391,11 @@ app.put('/api/products/:id', authenticateToken, upload.any(), (req, res) => {
       
       const colorData = JSON.parse(colors);
       
-      // Map uploaded files to colors, preserving existing images
+      // Map uploaded files to colors, preserving existing images and names
       const colorsWithImages = colorData.map((color, index) => {
         const imageFile = files.find(f => f.fieldname === `color_image_${index}`);
         const existingImage = existingColors[index]?.image;
+        const existingName = existingColors[index]?.name || '';
         
         // If new image uploaded and there was an existing image, mark old image for deletion
         if (imageFile && existingImage) {
@@ -401,6 +403,7 @@ app.put('/api/products/:id', authenticateToken, upload.any(), (req, res) => {
         }
         
         return {
+          name: (color.name !== undefined && color.name !== null) ? color.name : existingName,
           color: color.color,
           // If new image uploaded, use it; otherwise keep existing image
           image: imageFile ? `/uploads/${imageFile.filename}` : existingImage
